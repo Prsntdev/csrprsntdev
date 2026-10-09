@@ -1,0 +1,309 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AshrayaCSR - Next-Gen Humanitarian Grid</title>
+    <!-- Leaflet.js Maps CSS -->
+    <link rel="stylesheet" href="https://unpkg.com" />
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --accent-blue: #2563eb;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--bg-secondary);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+            color: #fff;
+        }
+
+        header p {
+            margin: 3px 0 0 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .badge-challenge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+        }
+
+        /* 3-Column Ecosystem Layout */
+        .workspace {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 75px);
+            overflow: hidden;
+        }
+
+        /* Left Side Panels (Citizen & NGO/CSR Grid) */
+        .controls-sidebar {
+            width: 450px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .section-box {
+            padding: 20px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #38bdf8;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Form Styling */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input, textarea, select {
+            background-color: var(--bg-primary);
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text-main);
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-blue { background-color: var(--accent-blue); color: white; }
+        .btn-blue:hover { background-color: #1d4ed8; }
+        .btn-action { padding: 6px 10px; font-size: 12px; border-radius: 6px; margin-top: 5px; width: auto; align-self: flex-start; }
+        .btn-green { background-color: var(--accent-green); color: white; }
+        .btn-green:hover { background-color: #059669; }
+
+        /* Case Feed Stream Cards */
+        .feed-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .case-card {
+            background-color: var(--bg-primary);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: transform 0.2s;
+        }
+
+        .case-card:hover {
+            transform: translateY(-2px);
+            border-color: #475569;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .status-pending { background-color: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-rescued { background-color: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        /* Right Side Map Area */
+        #map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay-title {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            z-index: 1000;
+            font-size: 12px;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>🤝 AshrayaCSR Matrix</h1>
+            <p>Designed by Prashant Yadav & Harshit | IT Branch, Government Polytechnic Lucknow</p>
+        </div>
+        <div class="badge-challenge">🏆 सेवा संकल्पना: Innovation Challenge 2026</div>
+    </header>
+
+    <div class="workspace">
+        <!-- Left Control Ecosystem -->
+        <div class="controls-sidebar">
+            
+            <!-- Tier 1: Citizen Input Platform -->
+            <div class="section-box">
+                <div class="section-title">📱 1. Citizen Reporter Interface</div>
+                <div class="form-group">
+                    <label>Condition Description / विवरण</label>
+                    <textarea id="caseDesc" placeholder="e.g., Extremely sick elderly person on footpath needing immediate rescue..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Nearby Landmark / स्थल संकेत</label>
+                    <input type="text" id="caseLandmark" placeholder="e.g., Near Munshipulia Metro Pillar 12, Lucknow">
+                </div>
+                <button class="btn-blue" onclick="citizenReportTrigger()">🚀 Broadcast Live Emergency Alert</button>
+            </div>
+
+            <!-- Tier 2: Real-time NGO & CSR Grid Feeds -->
+            <div class="section-box" style="flex: 1;">
+                <div class="section-title">🏢 2. NGO & 💼 3. CSR Unified Control Grid</div>
+                <div id="feedStream" class="feed-container">
+                    <!-- Real-time dynamic nodes appear here -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Map Dashboard View -->
+        <div id="map-container">
+            <div class="map-overlay-title">📡 LIVE HYPERLOCAL RADAR: LUCKNOW ACTIVE CORRIDORS</div>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS Map Infrastructure Library -->
+    <script src="https://unpkg.com"></script>
+    <script>
+        // Centralized Runtime Memory Layer (Simulating a Production NoSQL Database)
+        let dataset = [
+            {
+                id: "CASE-LKO-882",
+                desc: "An elderly person unable to walk, lying under the bridge flyover.",
+                landmark: "Polytechnic Chauraha, Lucknow",
+                lat: 26.8726, lng: 80.9856,
+                status: "Pending Rescue",
+                budget: "₹15,000/mo Needed",
+                sponsor: "None"
+            },
+            {
+                id: "CASE-LKO-441",
+                desc: "Mother with a small toddler shivering without proper blankets on pavement.",
+                landmark: "Hazratganj GPO Crossing, Lucknow",
+                lat: 26.8504, lng: 80.9404,
+                status: "Rescued & Sheltered",
+                budget: "Fully Funded",
+                sponsor: "Tata Foundation CSR"
+            }
+        ];
+
+        let mapObj;
+        let mapMarkers = {};
+
+        // Initialize Core Viewport Matrix
+        function startSystem() {
+            // Centers map onto standard Lucknow coordinates grid
+            mapObj = L.map('map', { zoomControl: false }).setView([26.875, 80.965], 13);
+            L.control.zoom({ position: 'bottomright' }).addTo(mapObj);
+
+            // Dark-styled sleek map layers matching the dashboard aesthetic
+            L.tileLayer('https://{s}://{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(mapObj);
+
+            refreshDashboardGrid();
+        }
+
+        // Logic for Tier 1: Action Dispatch Trigger
